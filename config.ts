@@ -69,4 +69,4 @@ ${DATE_AND_TIME}
 </date-and-time>
 `;
 
-export const CLEAR_CHAT_TEXT = "Clear";
+export const CLEAR_CHAT_TEXT = "New";

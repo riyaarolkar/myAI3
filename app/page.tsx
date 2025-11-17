@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useChat } from "@ai-sdk/react";
-import { ArrowUp, Eraser, Loader2, PlusIcon, Square } from "lucide-react";
+import { ArrowUp, Eraser, Loader2, Plus, PlusIcon, Square } from "lucide-react";
 import { MessageWall } from "@/components/messages/message-wall";
 import { ChatHeader } from "@/app/parts/chat-header";
 import { ChatHeaderBlock } from "@/app/parts/chat-header";
@@ -160,7 +160,7 @@ export default function Chat() {
               className="cursor-pointer"
               onClick={clearChat}
             >
-              <Eraser className="size-4" />
+              <Plus className="size-4" />
               {CLEAR_CHAT_TEXT}
             </Button>
           </ChatHeaderBlock>

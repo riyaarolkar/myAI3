@@ -1,7 +1,7 @@
 # Luxury Handbag Explorer
 
 ## Overview
-A premium luxury handbag discovery platform. Users can search across multiple online stores to find designer handbags with elegant product cards that link directly to the original product pages.
+A professional luxury handbag price-aggregator platform inspired by Chrono24 and Skyscanner. Users can search across multiple premium retailers to find designer handbags, compare prices, and click through to original product pages.
 
 ## Project Status
 - **Last Updated**: November 26, 2025
@@ -12,82 +12,144 @@ A premium luxury handbag discovery platform. Users can search across multiple on
 - **Deployment**: Configured for Replit autoscale deployment
 
 ## Recent Changes
-- **Nov 26, 2025**: Luxury redesign with premium white/cream/brown/black theme
-  - Elegant white and cream color palette with stone and amber accents
-  - Serif typography for luxury branding ("Find Your Perfect Bag")
-  - 3-column responsive grid layout (3 desktop, 2 tablet, 1 mobile)
-  - Refined product cards with subtle shadows and hover effects
-  - Professional uppercase brand badges
-  - Exa API integrated for live web search with real product images
+- **Nov 26, 2025**: Complete rebuild per specification
+  - New landing page with "Find Your Perfect Bag" hero
+  - Chrono24-style Explore page with curated category grid
+  - Multi-select filters: Brands, Countries, Bag Types, Price Range, Currency
+  - 4-column responsive product grid (4 desktop, 2 tablet, 1 mobile)
+  - Compare functionality with checkboxes on product cards
+  - New API structure: /api/search (GET), /api/explore (GET), /api/similar (GET)
+  - Pinecone integration for vector similarity search
+  - OpenAI embeddings for product indexing
+  - Currency conversion with live exchange rates
+  - Real product images from Exa web search
 
 ## Key Features
-1. **Explore Grid**: 3-column layout with luxury product cards
-2. **Live Search**: Search across multiple luxury retailers via Exa API
-3. **Advanced Filters**: 
-   - Country (US, UK, France, Italy, Japan, etc.)
-   - Currency (USD, EUR, GBP, JPY)
-   - Price Range (Under $500 to Over $25,000)
-   - Brand (18 luxury brands including Hermès, Chanel, LV, Gucci, etc.)
-   - Bag Type (Tote, Crossbody, Shoulder, Clutch, etc.)
-4. **Product Cards**: Image, name, price, source site, and view button
-5. **Direct Links**: All cards link to original product pages
+1. **Landing Page**: Hero search with collapsible filters panel
+2. **Explore Page**: Chrono24-style category grid (Iconic Birkins, Chanel Classics, etc.)
+3. **Advanced Search**:
+   - Multi-select brand filters (17 luxury brands)
+   - Country filters (11 countries)
+   - Bag type filters (12 types)
+   - Price range selection
+   - Currency conversion (USD, EUR, GBP, JPY, CHF, INR)
+4. **Product Cards**: 
+   - Brand pill (top-left, uppercase)
+   - Compare checkbox
+   - Lazy-loaded images with fallback
+   - Retailer name and country
+   - Price with currency
+   - View button (opens retailer in new tab)
+5. **Vector Search**: Pinecone-powered similarity recommendations
+6. **Live Search**: Exa API for real-time product discovery
 
 ## Environment Configuration
 
 ### Required Environment Variables
-1. **EXA_API_KEY** (Required for search functionality)
+1. **EXA_API_KEY** (Required for search)
    - Used for: Web search to find handbag listings
    - Get from: https://dashboard.exa.ai/
 
-### Setting Up
-1. Go to https://dashboard.exa.ai/ and sign up
-2. Copy your API key
-3. Add it as a secret named `EXA_API_KEY` in the Secrets tab
+2. **OPENAI_API_KEY** (Required for embeddings)
+   - Used for: Generating product embeddings
+   - Get from: https://platform.openai.com/
+
+3. **PINECONE_API_KEY** (Required for similarity search)
+   - Used for: Vector database for product similarity
+   - Get from: https://app.pinecone.io/
+   - Index: Create with 1536 dimensions, cosine metric
+
+### Optional Configuration
+- **PINECONE_INDEX_NAME**: Custom index name (default: "luxury-handbags")
 
 ## Project Architecture
 
-### Key Directories
-- **app/**: Next.js app router structure
-  - **api/search-handbags/**: API endpoint for handbag search
-  - **page.tsx**: Main explore page
-- **components/**: React components
-  - **handbags/**: Handbag-specific components
-    - `product-card.tsx`: Elegant product card with hover effects
-    - `explore-filters.tsx`: Collapsible filter panel
-    - `explore-grid.tsx`: 3-column responsive grid
-  - **ui/**: Base UI components (shadcn/ui)
+### API Endpoints
+- **GET /api/search**: Search handbags with filters
+  - Query params: q, brands, bag_type, country, min_price, max_price, currency, page, per_page
+  - Returns: Paginated list of products
+  
+- **GET /api/explore**: Get curated category collections
+  - Returns: Array of categories with images and filter URLs
+  
+- **GET /api/similar**: Find similar products
+  - Query params: id (product ID) or q (query text), topK
+  - Returns: Array of similar products from Pinecone
 
-### Main Configuration Files
-- **config.ts**: Application configuration
-- **next.config.ts**: Next.js configuration
-- **package.json**: Dependencies and scripts
+### Key Directories
+```
+app/
+├── api/
+│   ├── search/route.ts      # Main search endpoint
+│   ├── explore/route.ts     # Category collections
+│   └── similar/route.ts     # Similarity search
+├── explore/page.tsx         # Explore page with categories
+└── page.tsx                 # Landing page with search
+
+components/
+├── handbags/
+│   ├── brand-pill.tsx       # Brand badge component
+│   ├── search-bar.tsx       # Search input component
+│   ├── filters-panel.tsx    # Multi-select filter panel
+│   ├── explore-filters.tsx  # Simple dropdown filters
+│   ├── explore-grid.tsx     # Product grid with skeleton
+│   └── product-card.tsx     # Product card with compare
+└── ui/                      # Base shadcn/ui components
+
+lib/
+├── api.ts                   # Client API wrappers
+├── currency.ts              # Currency conversion helpers
+├── handbag-pinecone.ts      # Pinecone vector operations
+└── utils.ts                 # General utilities
+```
+
+### Data Model (Product Schema)
+```json
+{
+  "id": "string",
+  "title": "string",
+  "brand": "string",
+  "bag_type": "string",
+  "retailer": "string",
+  "retailer_country": "string",
+  "price": {"amount": number | null, "currency": "USD"},
+  "price_display": "string",
+  "image_url": "https://...",
+  "product_url": "https://...",
+  "scraped_at": "ISO8601",
+  "attributes": {"color": "...", "size": "...", "material": "..."}
+}
+```
 
 ## Supported Luxury Brands
-- Hermès, Chanel, Louis Vuitton, Gucci, Prada
-- Dior, Céline, Bottega Veneta, Balenciaga, Saint Laurent
-- Fendi, Loewe, Chloé, Givenchy, Valentino, Burberry, Goyard
+Hermès, Chanel, Louis Vuitton, Gucci, Prada, Dior, Céline, Bottega Veneta, Balenciaga, Saint Laurent, Fendi, Loewe, Chloé, Givenchy, Valentino, Burberry, Goyard
 
-## Supported Retailers (auto-detected)
-- Farfetch, Net-a-Porter, Mytheresa, SSENSE
-- Nordstrom, Saks Fifth Avenue, Neiman Marcus, Bloomingdale's
-- The RealReal, Vestiaire Collective, Rebag, Fashionphile
-- Official brand websites (Louis Vuitton, Chanel, Gucci, etc.)
+## Supported Bag Types
+Tote, Shoulder, Crossbody, Clutch, Top-handle, Satchel, Hobo, Backpack, Bucket, Flap, Belt Bag, Mini Bag
+
+## Supported Countries
+United States, United Kingdom, France, Italy, Germany, Japan, UAE, Singapore, Hong Kong, Canada, Spain
+
+## Supported Currencies
+USD ($), EUR (€), GBP (£), JPY (¥), CHF, INR (₹)
 
 ## Technical Stack
 - **Frontend**: Next.js 16, React 19, TypeScript
-- **Styling**: Tailwind CSS 4, luxury white/cream/brown theme
+- **Styling**: Tailwind CSS 4, luxury white/cream/stone/amber theme
 - **Search API**: Exa (neural web search)
+- **Vector DB**: Pinecone (similarity search)
+- **Embeddings**: OpenAI text-embedding-3-small
 - **UI Components**: Radix UI primitives, shadcn/ui
 - **Icons**: Lucide React
 - **Notifications**: Sonner
 
 ## UI Design
-- **Theme**: Luxury white with stone/amber accents
-- **Colors**: White, cream (stone-50), brown (stone-900), amber accents
-- **Layout**: 3-column grid (responsive: 3 → 2 → 1 columns)
-- **Cards**: Clean white cards with subtle shadows and hover lift
-- **Typography**: Serif headings, clean sans-serif body
-- **Animations**: Smooth scale, shadow, and transition effects
+- **Theme**: Luxury white with stone and amber accents
+- **Colors**: White, stone-50 (cream), stone-900 (near black), amber-600 (accent)
+- **Layout**: 4-column responsive grid (4 → 2 → 1 columns)
+- **Cards**: White with subtle shadows, 2xl rounded corners, hover scale effect
+- **Typography**: Serif headings (Playfair-style), sans-serif body
+- **Animations**: Smooth transitions, scale on hover, loading skeletons
 
 ## Development
 
@@ -100,16 +162,21 @@ Deployment is configured for Replit autoscale:
 - Run: `npm run start`
 Click the Publish button to deploy.
 
-### Adding New Brands
-Edit `components/handbags/explore-filters.tsx` and add to the `BRANDS` array.
+### API Testing Examples
+```bash
+# Search for Hermès bags
+curl "https://your-app.replit.dev/api/search?q=birkin&brands=Hermès"
 
-### Adding New Bag Types
-Edit `components/handbags/explore-filters.tsx` and add to the `BAG_TYPES` array.
+# Get explore categories
+curl "https://your-app.replit.dev/api/explore"
 
-### Modifying Card Design
-Edit `components/handbags/product-card.tsx` to customize card appearance.
+# Find similar products
+curl "https://your-app.replit.dev/api/similar?q=black+leather+tote&topK=5"
+```
 
 ## User Preferences
-- Luxury aesthetic with white/brown/black color scheme
-- Clean, elegant design similar to high-end fashion sites
-- Real product images when available from search results
+- Professional luxury aesthetic with white/stone/amber color scheme
+- Chrono24-inspired explore page with category tiles
+- Multi-select filters for power users
+- Compare functionality for price comparison
+- Real product images when available from retailers

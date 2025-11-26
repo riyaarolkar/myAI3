@@ -2,17 +2,27 @@
 
 import { useState, useEffect } from "react";
 import { Toaster, toast } from "sonner";
-import { Search, Sparkles, ShoppingBag } from "lucide-react";
+import { Search, Sparkles, ShoppingBag, ArrowRight } from "lucide-react";
 import { ExploreFilters, FilterValues } from "@/components/handbags/explore-filters";
 import { ExploreGrid } from "@/components/handbags/explore-grid";
 import { HandbagResult } from "@/components/handbags/product-card";
+import Link from "next/link";
 
-export default function ExplorePage() {
+interface ExploreCategory {
+  id: string;
+  title: string;
+  description: string;
+  image_url: string;
+  filter_url: string;
+}
+
+export default function LandingPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<HandbagResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<ExploreCategory[]>([]);
   const [filters, setFilters] = useState<FilterValues>({
     country: "all",
     currency: "all",
@@ -21,38 +31,43 @@ export default function ExplorePage() {
     bagType: "all",
   });
 
+  useEffect(() => {
+    fetchCategories();
+    performSearch("luxury designer handbag");
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch("/api/explore");
+      if (response.ok) {
+        const data = await response.json();
+        setCategories(data.categories || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch categories:", err);
+    }
+  };
+
   const performSearch = async (searchQuery: string = "", currentFilters: FilterValues = filters) => {
     setIsLoading(true);
     setError(null);
     setHasSearched(true);
 
     try {
-      let priceMin: number | undefined;
-      let priceMax: number | undefined;
-
+      const params = new URLSearchParams();
+      if (searchQuery) params.set("q", searchQuery);
+      if (currentFilters.brand !== "all") params.set("brands", currentFilters.brand);
+      if (currentFilters.bagType !== "all") params.set("bag_type", currentFilters.bagType);
+      if (currentFilters.country !== "all") params.set("country", currentFilters.country);
+      if (currentFilters.currency !== "all") params.set("currency", currentFilters.currency);
+      
       if (currentFilters.priceRange && currentFilters.priceRange !== "all") {
         const [min, max] = currentFilters.priceRange.split("-");
-        const parsedMin = parseInt(min);
-        const parsedMax = parseInt(max);
-        priceMin = !isNaN(parsedMin) ? parsedMin : undefined;
-        priceMax = !isNaN(parsedMax) ? parsedMax : undefined;
+        if (min) params.set("min_price", min);
+        if (max) params.set("max_price", max);
       }
 
-      const response = await fetch("/api/search-handbags", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: searchQuery || "luxury designer",
-          brand: currentFilters.brand !== "all" ? currentFilters.brand : undefined,
-          bagType: currentFilters.bagType !== "all" ? currentFilters.bagType : undefined,
-          country: currentFilters.country !== "all" ? currentFilters.country : undefined,
-          currency: currentFilters.currency !== "all" ? currentFilters.currency : undefined,
-          priceMin,
-          priceMax,
-        }),
-      });
+      const response = await fetch(`/api/search?${params.toString()}`);
 
       if (!response.ok) {
         const data = await response.json();
@@ -63,7 +78,7 @@ export default function ExplorePage() {
       setResults(data.results);
 
       if (data.results.length === 0) {
-        toast.info("No handbags found. Try a different search term.");
+        toast.info("No handbags found. Try widening your filters.");
       }
     } catch (err) {
       console.error("Search error:", err);
@@ -74,10 +89,6 @@ export default function ExplorePage() {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    performSearch("luxury handbag");
-  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,6 +126,15 @@ export default function ExplorePage() {
               </div>
             </div>
             
+            <nav className="hidden md:flex items-center gap-6">
+              <Link href="/" className="text-sm font-medium text-stone-900 hover:text-amber-700 transition-colors">
+                Search
+              </Link>
+              <Link href="/explore" className="text-sm font-medium text-stone-600 hover:text-amber-700 transition-colors">
+                Explore
+              </Link>
+            </nav>
+
             <div className="hidden md:flex items-center gap-2 text-sm text-stone-500">
               <Sparkles className="w-4 h-4 text-amber-600" />
               <span className="font-medium">Powered by AI</span>
@@ -125,11 +145,11 @@ export default function ExplorePage() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-serif font-light text-stone-900 mb-3">
+          <h2 className="text-3xl md:text-5xl font-serif font-light text-stone-900 mb-4">
             Find Your Perfect Bag
           </h2>
-          <p className="text-stone-500 max-w-2xl mx-auto">
-            Search across hundreds of luxury retailers to discover the finest designer handbags from the world's most prestigious fashion houses.
+          <p className="text-stone-500 max-w-2xl mx-auto text-lg">
+            Discover designer handbags across premium retailers worldwide. Compare prices, find rare pieces, and shop with confidence.
           </p>
         </div>
 
@@ -142,7 +162,7 @@ export default function ExplorePage() {
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search for 'Birkin', 'Classic Flap', 'Neverfull'..."
+                  placeholder="Search brands, models (e.g. Birkin), keywords…"
                   className="w-full h-14 pl-12 pr-4 bg-stone-50 border border-stone-100 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500/50 transition-all"
                 />
               </div>
@@ -175,11 +195,47 @@ export default function ExplorePage() {
           />
         </div>
 
+        {categories.length > 0 && !hasSearched && (
+          <section className="mb-16">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-serif text-stone-900">Explore Categories</h3>
+              <Link 
+                href="/explore" 
+                className="text-sm font-medium text-amber-700 hover:text-amber-800 flex items-center gap-1"
+              >
+                View all
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {categories.slice(0, 4).map((category) => (
+                <Link
+                  key={category.id}
+                  href={category.filter_url}
+                  className="group relative aspect-[4/3] rounded-2xl overflow-hidden bg-stone-100"
+                >
+                  <img
+                    src={category.image_url}
+                    alt={category.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4">
+                    <h4 className="text-white font-semibold text-lg">{category.title}</h4>
+                    <p className="text-white/80 text-sm">{category.description}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
         <ExploreGrid
           results={results}
           isLoading={isLoading}
           hasSearched={hasSearched}
           error={error}
+          showCompare={true}
         />
       </main>
 

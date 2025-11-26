@@ -2,15 +2,31 @@
 
 import { ShoppingBag, AlertCircle, Search } from "lucide-react";
 import { ProductCard, ProductCardSkeleton, HandbagResult } from "./product-card";
+import { useState } from "react";
 
 interface ExploreGridProps {
   results: HandbagResult[];
   isLoading: boolean;
   hasSearched: boolean;
   error?: string | null;
+  showCompare?: boolean;
 }
 
-export function ExploreGrid({ results, isLoading, hasSearched, error }: ExploreGridProps) {
+export function ExploreGrid({ results, isLoading, hasSearched, error, showCompare = false }: ExploreGridProps) {
+  const [comparedItems, setComparedItems] = useState<Set<string>>(new Set());
+
+  const handleCompareChange = (id: string, checked: boolean) => {
+    setComparedItems(prev => {
+      const next = new Set(prev);
+      if (checked) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+      return next;
+    });
+  };
+
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -30,8 +46,8 @@ export function ExploreGrid({ results, isLoading, hasSearched, error }: ExploreG
           <div className="w-6 h-6 border-2 border-stone-900 border-t-transparent rounded-full animate-spin" />
           <span className="text-stone-500">Searching luxury retailers...</span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
             <ProductCardSkeleton key={i} />
           ))}
         </div>
@@ -86,10 +102,21 @@ export function ExploreGrid({ results, isLoading, hasSearched, error }: ExploreG
         <p className="text-stone-500">
           Found <span className="text-stone-900 font-semibold">{results.length}</span> handbags
         </p>
+        {comparedItems.size > 0 && (
+          <button className="px-4 py-2 bg-amber-100 text-amber-800 text-sm font-medium rounded-lg hover:bg-amber-200 transition-colors">
+            Compare ({comparedItems.size})
+          </button>
+        )}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {results.map((product) => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard 
+            key={product.id} 
+            product={product}
+            showCompare={showCompare}
+            isCompared={comparedItems.has(product.id)}
+            onCompareChange={handleCompareChange}
+          />
         ))}
       </div>
     </div>

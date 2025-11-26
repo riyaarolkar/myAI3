@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { ShoppingBag, Sparkles, ArrowLeft, Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -16,7 +16,7 @@ interface ExploreCategory {
   filter_url: string;
 }
 
-export default function ExplorePage() {
+function ExploreContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -142,7 +142,7 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-stone-100">
+    <>
       <header className="border-b border-stone-200 bg-white/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
@@ -285,6 +285,53 @@ export default function ExplorePage() {
           </div>
         </div>
       </footer>
+    </>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-stone-100">
+      <header className="border-b border-stone-200 bg-white/80 backdrop-blur-xl sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-20">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-stone-900 to-stone-700 rounded-xl flex items-center justify-center shadow-lg">
+                <ShoppingBag className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-serif font-semibold text-stone-900 tracking-tight">Luxury Handbag Explorer</h1>
+                <p className="text-sm text-stone-500">Discover designer bags across premium retailers</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-serif font-light text-stone-900 mb-4">
+            Explore Collections
+          </h2>
+          <p className="text-stone-500 max-w-2xl mx-auto">
+            Loading collections...
+          </p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="aspect-[4/5] rounded-2xl bg-stone-200 animate-pulse" />
+          ))}
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default function ExplorePage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-stone-100">
+      <Suspense fallback={<LoadingFallback />}>
+        <ExploreContent />
+      </Suspense>
     </div>
   );
 }

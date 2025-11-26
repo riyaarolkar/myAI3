@@ -1,7 +1,7 @@
 # Luxury Handbag Explorer
 
 ## Overview
-A Sora/Instagram Explore-style luxury handbag discovery platform. Users can search across multiple online stores to find luxury handbags with beautiful product cards that link directly to the original product pages.
+A premium luxury handbag discovery platform. Users can search across multiple online stores to find designer handbags with elegant product cards that link directly to the original product pages.
 
 ## Project Status
 - **Last Updated**: November 26, 2025
@@ -9,19 +9,20 @@ A Sora/Instagram Explore-style luxury handbag discovery platform. Users can sear
 - **Framework**: Next.js 16.0.0 with React 19.2.0
 - **Language**: TypeScript
 - **Port**: 5000 (frontend)
+- **Deployment**: Configured for Replit autoscale deployment
 
 ## Recent Changes
-- **Nov 26, 2025**: Complete redesign to Sora/Instagram Explore-style interface
-  - Dark, modern gradient theme with purple/pink accents
+- **Nov 26, 2025**: Luxury redesign with premium white/cream/brown/black theme
+  - Elegant white and cream color palette with stone and amber accents
+  - Serif typography for luxury branding ("Find Your Perfect Bag")
   - 3-column responsive grid layout (3 desktop, 2 tablet, 1 mobile)
-  - Beautiful product cards with hover effects and animations
-  - Comprehensive filters (Country, Currency, Price Range, Brand, Bag Type)
-  - Auto-loading explore view with default handbag search
-  - Clickable product cards linking to original store pages
+  - Refined product cards with subtle shadows and hover effects
+  - Professional uppercase brand badges
+  - Exa API integrated for live web search with real product images
 
 ## Key Features
-1. **Explore Grid**: Instagram/Sora-style 3-column layout with 10 handbag cards
-2. **Live Search**: Search across multiple luxury retailers
+1. **Explore Grid**: 3-column layout with luxury product cards
+2. **Live Search**: Search across multiple luxury retailers via Exa API
 3. **Advanced Filters**: 
    - Country (US, UK, France, Italy, Japan, etc.)
    - Currency (USD, EUR, GBP, JPY)
@@ -51,7 +52,7 @@ A Sora/Instagram Explore-style luxury handbag discovery platform. Users can sear
   - **page.tsx**: Main explore page
 - **components/**: React components
   - **handbags/**: Handbag-specific components
-    - `product-card.tsx`: Beautiful product card with hover effects
+    - `product-card.tsx`: Elegant product card with hover effects
     - `explore-filters.tsx`: Collapsible filter panel
     - `explore-grid.tsx`: 3-column responsive grid
   - **ui/**: Base UI components (shadcn/ui)
@@ -74,23 +75,30 @@ A Sora/Instagram Explore-style luxury handbag discovery platform. Users can sear
 
 ## Technical Stack
 - **Frontend**: Next.js 16, React 19, TypeScript
-- **Styling**: Tailwind CSS 4, dark gradient theme
+- **Styling**: Tailwind CSS 4, luxury white/cream/brown theme
 - **Search API**: Exa (neural web search)
 - **UI Components**: Radix UI primitives, shadcn/ui
 - **Icons**: Lucide React
 - **Notifications**: Sonner
 
 ## UI Design
-- **Theme**: Dark with purple/pink gradient accents
+- **Theme**: Luxury white with stone/amber accents
+- **Colors**: White, cream (stone-50), brown (stone-900), amber accents
 - **Layout**: 3-column grid (responsive: 3 → 2 → 1 columns)
-- **Cards**: Glassmorphism style with hover lift effect
-- **Animations**: Smooth scale, glow, and transition effects
-- **Typography**: Inter font with clear hierarchy
+- **Cards**: Clean white cards with subtle shadows and hover lift
+- **Typography**: Serif headings, clean sans-serif body
+- **Animations**: Smooth scale, shadow, and transition effects
 
 ## Development
 
 ### Running the Application
 The application runs via the Next.js Dev Server workflow on port 5000.
+
+### Deployment
+Deployment is configured for Replit autoscale:
+- Build: `npm run build`
+- Run: `npm run start`
+Click the Publish button to deploy.
 
 ### Adding New Brands
 Edit `components/handbags/explore-filters.tsx` and add to the `BRANDS` array.
@@ -101,13 +109,7 @@ Edit `components/handbags/explore-filters.tsx` and add to the `BAG_TYPES` array.
 ### Modifying Card Design
 Edit `components/handbags/product-card.tsx` to customize card appearance.
 
-## Known Limitations
-- Product images use placeholder images (actual scraping would require additional implementation)
-- Price extraction relies on text parsing
-- Results depend on Exa API search quality
-
-## Future Enhancements
-- Integrate actual product image scraping
-- Add saved searches and favorites
-- Implement price alerts
-- Add user accounts and wishlist
+## User Preferences
+- Luxury aesthetic with white/brown/black color scheme
+- Clean, elegant design similar to high-end fashion sites
+- Real product images when available from search results

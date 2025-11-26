@@ -358,10 +358,7 @@ export async function POST(request: NextRequest) {
       const { price, priceText, currency: detectedCurrency } = extractPrice(result.text || '');
       const detectedBrand = extractBrand(result.text || '', result.title || '');
       
-      let imageUrl = '';
-      if (result.image) {
-        imageUrl = result.image;
-      } else {
+      const getPlaceholderImage = (brand: string | null): string => {
         const brandColors: Record<string, string> = {
           'Hermès': 'D97706',
           'Chanel': '1c1917',
@@ -376,10 +373,12 @@ export async function POST(request: NextRequest) {
           'Fendi': 'b45309',
           'Loewe': '7c2d12',
         };
-        const color = brandColors[detectedBrand || ''] || '78716c';
-        const initials = (detectedBrand || 'LX').substring(0, 2).toUpperCase();
-        imageUrl = `https://placehold.co/400x500/${color}/FFFFFF?text=${initials}&font=playfair-display`;
-      }
+        const color = brandColors[brand || ''] || '78716c';
+        const initials = (brand || 'LX').substring(0, 2).toUpperCase();
+        return `https://placehold.co/400x500/${color}/FFFFFF?text=${initials}&font=playfair-display`;
+      };
+
+      const imageUrl = result.image || getPlaceholderImage(detectedBrand);
       
       return {
         id: `handbag-${index}-${Date.now()}`,

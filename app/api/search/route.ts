@@ -18,13 +18,22 @@ const BRANDS = [
   'Hermès', 'Hermes', 'Chanel', 'Louis Vuitton', 'LV', 'Gucci', 'Prada',
   'Dior', 'Christian Dior', 'Celine', 'Céline', 'Bottega Veneta', 'Balenciaga',
   'Saint Laurent', 'YSL', 'Fendi', 'Loewe', 'Chloé', 'Chloe', 'Givenchy',
-  'Valentino', 'Burberry', 'Goyard'
+  'Valentino', 'Burberry', 'Goyard', 'Coach', 'Michael Kors', 'Kate Spade',
+  'Tory Burch', 'Marc Jacobs', 'Mulberry', 'Alexander McQueen'
 ];
 
 const BAG_TYPES = [
   'tote', 'shoulder', 'crossbody', 'clutch', 'top-handle', 'satchel', 
-  'hobo', 'backpack', 'bucket', 'flap', 'belt bag', 'mini bag', 'birkin', 
-  'kelly', 'classic flap', 'boy bag', 'speedy', 'neverfull', 'lady dior'
+  'hobo', 'backpack', 'bucket', 'flap', 'belt bag', 'mini bag', 'birkin', 'kelly', 'classic flap', 'boy bag'
+];
+
+const RETAILER_DOMAINS = [
+  'farfetch.com', 'net-a-porter.com', 'mytheresa.com', 'ssense.com', 
+  'nordstrom.com', 'saks.com', 'neimanmarcus.com', 'therealreal.com',
+  'vestiairecollective.com', 'rebag.com', 'fashionphile.com', 'tradesy.com',
+  'yoogiscloset.com', 'portero.com', 'bagista.co.uk', 'collectorsquare.com',
+  'labellov.com', 'sellier.com', '24s.com', 'matchesfashion.com',
+  'luisaviaroma.com', 'brownsfashion.com', 'italist.com', 'cettire.com'
 ];
 
 function extractBrand(text: string, title: string): string {
@@ -70,8 +79,24 @@ function extractRetailer(url: string): { name: string; country: string } {
       'fashionphile.com': { name: 'Fashionphile', country: 'US' },
       'tradesy.com': { name: 'Tradesy', country: 'US' },
       'yoogiscloset.com': { name: "Yoogi's Closet", country: 'US' },
+      'portero.com': { name: 'Portero', country: 'US' },
+      'bagista.co.uk': { name: 'Bagista', country: 'UK' },
       'collectorsquare.com': { name: 'Collector Square', country: 'FR' },
       'labellov.com': { name: 'LabelLOV', country: 'BE' },
+      'sellier.com': { name: 'Sellier', country: 'FR' },
+      'louisvuitton.com': { name: 'Louis Vuitton', country: 'FR' },
+      'chanel.com': { name: 'Chanel', country: 'FR' },
+      'hermes.com': { name: 'Hermès', country: 'FR' },
+      'gucci.com': { name: 'Gucci', country: 'IT' },
+      'prada.com': { name: 'Prada', country: 'IT' },
+      'dior.com': { name: 'Dior', country: 'FR' },
+      'celine.com': { name: 'Celine', country: 'FR' },
+      'bottegaveneta.com': { name: 'Bottega Veneta', country: 'IT' },
+      'balenciaga.com': { name: 'Balenciaga', country: 'FR' },
+      'ysl.com': { name: 'Saint Laurent', country: 'FR' },
+      'fendi.com': { name: 'Fendi', country: 'IT' },
+      'loewe.com': { name: 'Loewe', country: 'ES' },
+      'chloe.com': { name: 'Chloé', country: 'FR' },
       '24s.com': { name: '24S', country: 'FR' },
       'matchesfashion.com': { name: 'Matches Fashion', country: 'UK' },
       'bloomingdales.com': { name: "Bloomingdale's", country: 'US' },
@@ -81,8 +106,6 @@ function extractRetailer(url: string): { name: string; country: string } {
       'brownsfashion.com': { name: 'Browns Fashion', country: 'UK' },
       'italist.com': { name: 'Italist', country: 'IT' },
       'cettire.com': { name: 'Cettire', country: 'AU' },
-      'modesens.com': { name: 'ModeSens', country: 'US' },
-      'jomashop.com': { name: 'Jomashop', country: 'US' },
     };
     return retailers[hostname] || { 
       name: hostname.split('.')[0].charAt(0).toUpperCase() + hostname.split('.')[0].slice(1),
@@ -94,9 +117,9 @@ function extractRetailer(url: string): { name: string; country: string } {
 }
 
 function extractAttributes(text: string): { color?: string; size?: string; material?: string } {
-  const colors = ['black', 'brown', 'tan', 'beige', 'white', 'cream', 'red', 'blue', 'green', 'pink', 'gold', 'silver', 'navy', 'burgundy', 'orange', 'yellow', 'purple', 'grey', 'gray', 'nude', 'camel'];
+  const colors = ['black', 'brown', 'tan', 'beige', 'white', 'cream', 'red', 'blue', 'green', 'pink', 'gold', 'silver', 'navy', 'burgundy', 'orange', 'yellow', 'purple', 'grey', 'gray'];
   const sizes = ['mini', 'small', 'medium', 'large', 'jumbo', '25', '30', '35', '40', 'pm', 'mm', 'gm', 'nano', 'micro'];
-  const materials = ['leather', 'canvas', 'suede', 'exotic', 'tweed', 'denim', 'nylon', 'lambskin', 'calfskin', 'caviar', 'togo', 'epsom', 'clemence', 'crocodile', 'python'];
+  const materials = ['leather', 'canvas', 'suede', 'exotic', 'tweed', 'denim', 'nylon', 'lambskin', 'calfskin', 'caviar', 'togo', 'epsom', 'clemence'];
 
   const lowerText = text.toLowerCase();
   
@@ -107,109 +130,62 @@ function extractAttributes(text: string): { color?: string; size?: string; mater
   };
 }
 
-function isSpecificProductPage(url: string): boolean {
-  try {
-    const parsedUrl = new URL(url);
-    const pathname = parsedUrl.pathname.toLowerCase();
-    const hostname = parsedUrl.hostname.toLowerCase();
-    
-    if (pathname === '/' || pathname === '') {
-      return false;
-    }
-    
-    const pathSegments = pathname.split('/').filter(seg => seg.length > 0);
-    
-    if (pathSegments.length < 2) {
-      return false;
-    }
-    
-    const categoryOnlyPatterns = [
-      /^\/(women|men|bags|handbags|accessories|shop|collection|category|search|browse|sale|new-arrivals?|designers?)\/?$/,
-      /^\/(women|men)\/(bags|handbags|accessories)\/?$/,
-      /^\/(shop|browse|shopping)\/(women|men|bags|handbags)\/?$/,
-      /^\/(women|men)\/(bags|handbags)\/[a-z-]+\/?$/,
-      /\/search\?/,
-      /\/browse\//,
-    ];
-    
-    if (categoryOnlyPatterns.some(pattern => pattern.test(pathname))) {
-      return false;
-    }
-    
-    const fullUrl = pathname;
-    const lastSegment = pathSegments[pathSegments.length - 1];
-    
-    const productIdPatterns = [
-      /\d{5,}/,
-      /-\d{4,}$/,
-      /-\d{4,}\./,
-      /item-\d+/i,
-      /-p\d{3,}/i,
-      /\/p\/[a-z0-9]+/i,
-      /sku[=:][a-z0-9]+/i,
-      /productid[=:]\d+/i,
-      /\.shtml$/,
-      /-[a-f0-9]{8,}/i,
-    ];
-    
-    const hasProductId = productIdPatterns.some(pattern => pattern.test(fullUrl) || pattern.test(lastSegment));
-    
-    if (hasProductId) {
-      return true;
-    }
-    
-    const retailerProductPatterns: Record<string, RegExp> = {
-      'therealreal.com': /\/products\/[^\/]+\/[^\/]+\/[^\/]+-\d+/,
-      'fashionphile.com': /\/(product|p)\/[a-z0-9-]+-\d+/,
-      'rebag.com': /\/infinity\/[a-z0-9-]+|\/clair\/[a-z0-9-]+/,
-      'vestiairecollective.com': /[a-z-]+-\d+\.shtml/,
-      'farfetch.com': /\/shopping\/[^\/]+\/item-\d+/,
-      'mytheresa.com': /[a-z-]+-p\d+/,
-      'net-a-porter.com': /\/product\/\d+/,
-      'ssense.com': /\/[a-z]+\/[a-z]+\/[a-z0-9-]+-\d+/,
-      '24s.com': /[a-z-]+-\d{5,}/,
-      'cettire.com': /[a-z-]+-\d{5,}/,
-    };
-    
-    for (const [domain, pattern] of Object.entries(retailerProductPatterns)) {
-      if (hostname.includes(domain)) {
-        return pattern.test(pathname);
-      }
-    }
-    
-    const genericProductIndicators = [
-      /\/product\/[a-z0-9-]+$/i,
-      /\/item\/[a-z0-9-]+$/i,
-      /\/p\/[a-z0-9]+$/i,
-      /[a-z]+-[a-z]+-[a-z0-9]+-\d{3,}$/,
-    ];
-    
-    return genericProductIndicators.some(pattern => pattern.test(pathname));
-  } catch {
-    return false;
-  }
+function isProductPage(url: string): boolean {
+  const productIndicators = [
+    '/product/', '/p/', '/pd/', '/dp/', '/item/', '/shop/', 
+    '/buy/', '/listing/', '/products/', '-p-', '/bags/',
+    'productid', 'itemid', 'sku', '/handbag/', '/bag/'
+  ];
+  const lowerUrl = url.toLowerCase();
+  return productIndicators.some(indicator => lowerUrl.includes(indicator)) || 
+         /\/[a-z0-9-]+\/[a-z0-9-]+-\d+/.test(lowerUrl);
 }
 
-function extractImageFromText(text: string): string | null {
-  const imgPatterns = [
-    /https?:\/\/[^\s"'<>]+\.(?:jpg|jpeg|png|webp|gif)(?:\?[^\s"'<>]*)?/gi,
-    /https?:\/\/[^\s"'<>]*(?:image|img|photo|pic)[^\s"'<>]*\.(?:jpg|jpeg|png|webp)/gi,
+function generateUniqueImageUrl(brand: string, bagType: string, color: string | undefined, index: number): string {
+  const brandImageMap: Record<string, string[]> = {
+    'Hermès': [
+      'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1614179689702-355944cd0918?w=600&h=600&fit=crop',
+    ],
+    'Chanel': [
+      'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop',
+    ],
+    'Louis Vuitton': [
+      'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=600&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=600&h=600&fit=crop',
+    ],
+    'Gucci': [
+      'https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=600&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1575032617751-6ddec2089882?w=600&h=600&fit=crop',
+    ],
+    'Dior': [
+      'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600&h=600&fit=crop',
+    ],
+    'Prada': [
+      'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=600&h=600&fit=crop',
+      'https://images.unsplash.com/photo-1614179689702-355944cd0918?w=600&h=600&fit=crop',
+    ],
+  };
+
+  const defaultImages = [
+    'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1566150905458-1bf1fc113f0d?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1594223274512-ad4803739b7c?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1591561954557-26941169b49e?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1614179689702-355944cd0918?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1575032617751-6ddec2089882?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1560891958-68bb1d610e0b?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1559563458-527698bf5295?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=600&fit=crop',
+    'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600&h=600&fit=crop&sat=-100',
   ];
-  
-  for (const pattern of imgPatterns) {
-    const matches = text.match(pattern);
-    if (matches && matches.length > 0) {
-      const validImage = matches.find(url => 
-        !url.includes('logo') && 
-        !url.includes('icon') && 
-        !url.includes('avatar') &&
-        !url.includes('placeholder') &&
-        (url.includes('product') || url.includes('bag') || url.includes('item') || matches.indexOf(url) < 3)
-      );
-      if (validImage) return validImage;
-    }
-  }
-  return null;
+
+  const brandImages = brandImageMap[brand] || defaultImages;
+  return brandImages[index % brandImages.length] || defaultImages[index % defaultImages.length];
 }
 
 export async function GET(request: NextRequest) {
@@ -233,75 +209,53 @@ export async function GET(request: NextRequest) {
         per_page: perPage,
         total: 0,
         results: [],
-        message: 'Search requires EXA_API_KEY configuration.',
+        message: 'Search functionality requires API configuration. Please add EXA_API_KEY to enable live search.',
       });
     }
 
-    let searchQuery = '';
+    let searchQuery = q || 'luxury designer handbag for sale';
     if (brands.length > 0) {
-      searchQuery = `${brands[0]} handbag bag for sale`;
-    } else if (q) {
-      searchQuery = `${q} luxury handbag for sale price`;
-    } else {
-      searchQuery = 'luxury designer handbag for sale price authentic';
+      searchQuery = `${brands.join(' OR ')} handbag bag for sale`;
     }
-    
     if (bagTypes.length > 0) {
-      searchQuery += ` ${bagTypes[0]}`;
+      searchQuery = `${searchQuery} ${bagTypes.join(' OR ')}`;
     }
+    searchQuery += ' price buy shop authentic';
 
-    const retailerDomains = [
-      'therealreal.com',
-      'fashionphile.com', 
-      'rebag.com',
-      'vestiairecollective.com',
-      'farfetch.com',
-      'mytheresa.com',
-      'net-a-porter.com',
-      'ssense.com',
-      '24s.com',
-      'cettire.com',
-    ];
+    const includeDomains = RETAILER_DOMAINS.slice(0, 10);
 
-    const searchResults = await exa.searchAndContents(searchQuery, {
-      text: { maxCharacters: 1500 },
-      highlights: { numSentences: 3 },
-      numResults: 25,
-      type: 'neural',
-      includeDomains: retailerDomains,
+    const { results: exaResults } = await exa.searchAndContents(searchQuery, {
+      text: { maxCharacters: 2000 },
+      numResults: Math.min(perPage * 3, 30),
+      type: 'auto',
+      includeDomains,
       livecrawl: 'always',
     });
 
-    const seenImages = new Set<string>();
+    const seenUrls = new Set<string>();
     const seenTitles = new Set<string>();
     
-    let results = searchResults.results
+    let results = exaResults
       .filter((result: any) => {
-        if (!result.url) return false;
+        if (!result.url || seenUrls.has(result.url)) return false;
         
-        if (!isSpecificProductPage(result.url)) {
-          return false;
-        }
+        const baseUrl = new URL(result.url).origin;
+        if (result.url === baseUrl || result.url === baseUrl + '/') return false;
         
-        const titleNormalized = (result.title || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 40);
-        if (titleNormalized && seenTitles.has(titleNormalized)) {
-          return false;
-        }
-        if (titleNormalized) seenTitles.add(titleNormalized);
+        const titleKey = result.title?.toLowerCase().slice(0, 50);
+        if (titleKey && seenTitles.has(titleKey)) return false;
+        
+        seenUrls.add(result.url);
+        if (titleKey) seenTitles.add(titleKey);
         
         return true;
       })
       .map((result: any, index: number) => {
-        const text = result.text || '';
-        const title = result.title || '';
-        const highlights = result.highlights?.join(' ') || '';
-        const combinedText = `${title} ${text} ${highlights}`;
-        
-        const priceInfo = detectCurrencyFromText(combinedText);
-        const brand = extractBrand(combinedText, title);
-        const bagType = extractBagType(combinedText, title);
+        const priceInfo = detectCurrencyFromText(result.text || '');
+        const brand = extractBrand(result.text || '', result.title || '');
+        const bagType = extractBagType(result.text || '', result.title || '');
         const retailer = extractRetailer(result.url);
-        const attributes = extractAttributes(combinedText);
+        const attributes = extractAttributes(result.text || result.title || '');
 
         let finalPrice = priceInfo.amount;
         let finalCurrency = priceInfo.currency;
@@ -311,25 +265,11 @@ export async function GET(request: NextRequest) {
           finalCurrency = currency;
         }
 
-        let imageUrl = result.image;
-        
-        if (!imageUrl || seenImages.has(imageUrl)) {
-          const extractedImage = extractImageFromText(text);
-          if (extractedImage && !seenImages.has(extractedImage)) {
-            imageUrl = extractedImage;
-          }
-        }
-        
-        if (!imageUrl || seenImages.has(imageUrl)) {
-          const uniqueImageId = Math.abs(hashCode(result.url + title)) % 1000;
-          imageUrl = `https://source.unsplash.com/600x600/?luxury,handbag,${brand.toLowerCase()},${uniqueImageId}`;
-        }
-        
-        if (imageUrl) seenImages.add(imageUrl);
+        const imageUrl = result.image || generateUniqueImageUrl(brand, bagType, attributes.color, index);
 
         return {
-          id: `product-${hashCode(result.url)}-${index}`,
-          title: cleanTitle(title),
+          id: `handbag-${index}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          title: result.title || 'Luxury Designer Handbag',
           brand,
           bag_type: bagType,
           retailer: retailer.name,
@@ -344,14 +284,10 @@ export async function GET(request: NextRequest) {
       });
 
     if (brands.length > 0) {
-      results = results.filter((r: any) => 
-        brands.some(b => r.brand.toLowerCase().includes(b.toLowerCase()) || r.title.toLowerCase().includes(b.toLowerCase()))
-      );
+      results = results.filter((r: any) => brands.some(b => r.brand.toLowerCase().includes(b.toLowerCase())));
     }
     if (bagTypes.length > 0) {
-      results = results.filter((r: any) => 
-        bagTypes.some(t => r.bag_type.toLowerCase().includes(t.toLowerCase()) || r.title.toLowerCase().includes(t.toLowerCase()))
-      );
+      results = results.filter((r: any) => bagTypes.some(t => r.bag_type.toLowerCase().includes(t.toLowerCase())));
     }
     if (countries.length > 0) {
       results = results.filter((r: any) => countries.includes(r.retailer_country));
@@ -379,23 +315,4 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-function hashCode(str: string): number {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash);
-}
-
-function cleanTitle(title: string): string {
-  return title
-    .replace(/\s*[-|]\s*(Farfetch|The RealReal|Fashionphile|Rebag|SSENSE|Mytheresa|Net-a-Porter|Vestiaire Collective|24S|Cettire).*$/i, '')
-    .replace(/\s*\|\s*.*$/, '')
-    .replace(/Buy\s+/i, '')
-    .replace(/Shop\s+/i, '')
-    .trim();
 }

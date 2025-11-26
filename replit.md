@@ -1,7 +1,7 @@
-# MyAI3 - AI Chatbot Assistant
+# LuxeBag Finder - Luxury Handbag Price Aggregator
 
 ## Overview
-MyAI3 is a customizable AI chatbot assistant built with Next.js, featuring web search capabilities (via Exa API), vector database integration (Pinecone), and content moderation using OpenAI's APIs. This project was imported from GitHub and configured to run on Replit.
+LuxeBag Finder is a price comparison tool for luxury handbags, similar to Skyscanner but for designer bags. Users can search for specific handbags and compare prices across multiple retailers to find the best deals.
 
 ## Project Status
 - **Last Updated**: November 26, 2025
@@ -11,105 +11,127 @@ MyAI3 is a customizable AI chatbot assistant built with Next.js, featuring web s
 - **Port**: 5000 (frontend)
 
 ## Recent Changes
-- **Nov 26, 2025**: Initial Replit environment setup
-  - Configured Next.js to run on 0.0.0.0:5000 for Replit proxy compatibility
-  - Updated next.config.ts to allow all origins for server actions
-  - Set up Next.js Dev Server workflow
-  - Installed all dependencies
+- **Nov 26, 2025**: Transformed from AI chatbot to luxury handbag price aggregator
+  - Created new search interface with brand/model filters
+  - Built API endpoint for searching handbag prices using Exa web search
+  - Added handbag result cards with retailer, price, and condition info
+  - Implemented sorting and filtering functionality
+  - Updated branding to "LuxeBag Finder"
+
+## Key Features
+1. **Search**: Search for luxury handbags by name, model, or brand
+2. **Brand Filter**: Filter by major luxury brands (Hermès, Chanel, Louis Vuitton, etc.)
+3. **Price Range Filter**: Filter results by price range
+4. **Sorting**: Sort by price (low to high or high to low)
+5. **Condition Badges**: Identify new vs. pre-owned items
+6. **Multi-Retailer**: Results from various retailers (Farfetch, Net-a-Porter, The RealReal, etc.)
 
 ## Environment Configuration
 
-### Required Environment Variables (Not Yet Set)
-The application requires the following API keys to be configured:
-
-1. **OPENAI_API_KEY** (Required)
-   - Used for: AI model responses and content moderation
-   - Get from: https://platform.openai.com/api-keys
-   
-2. **EXA_API_KEY** (Optional)
-   - Used for: Web search functionality
+### Required Environment Variables
+1. **EXA_API_KEY** (Required for search functionality)
+   - Used for: Web search to find handbag prices
    - Get from: https://dashboard.exa.ai/
-   
-3. **FIREWORKS_API_KEY** (Optional)
-   - Used for: Alternative AI models via Fireworks
-   - Get from: https://fireworks.ai/
-   
-4. **PINECONE_API_KEY** (Optional)
-   - Used for: Vector database search
-   - Get from: https://app.pinecone.io/
 
-### Setting Environment Variables
-Use the Replit Secrets tab to add these API keys. The application will work with just OPENAI_API_KEY, but additional features require the optional keys.
+### Optional Environment Variables (from original project)
+- **OPENAI_API_KEY**: For any AI features
+- **PINECONE_API_KEY**: For vector database (not used in current version)
 
 ## Project Architecture
 
 ### Key Directories
 - **app/**: Next.js app router structure
-  - **api/chat/**: Chat API endpoint and tool implementations
-  - **parts/**: UI component parts
-  - **terms/**: Terms of Use page
-- **components/**: Reusable React components
-  - **ai-elements/**: AI-specific UI components
-  - **messages/**: Message display components
+  - **api/search-handbags/**: API endpoint for handbag price search
+  - **page.tsx**: Main search interface
+- **components/**: React components
+  - **handbags/**: Handbag-specific components
+    - `handbag-card.tsx`: Individual result card
+    - `search-filters.tsx`: Search and filter controls
+    - `results-grid.tsx`: Results display grid
   - **ui/**: Base UI components (shadcn/ui)
-- **lib/**: Utility libraries (moderation, Pinecone, sources, utils)
-- **types/**: TypeScript type definitions
-- **hooks/**: Custom React hooks
+- **lib/**: Utility libraries
 
 ### Main Configuration Files
-- **config.ts**: Application configuration (AI name, model, moderation messages, Pinecone settings)
-- **prompts.ts**: System prompts that define AI behavior
+- **config.ts**: Application configuration
 - **next.config.ts**: Next.js configuration (configured for Replit)
 - **package.json**: Dependencies and scripts
 
-## Features
-1. **AI Chat Interface**: Powered by OpenAI GPT-4.1
-2. **Web Search**: Real-time web search using Exa API
-3. **Vector Database Search**: Knowledge base search using Pinecone
-4. **Content Moderation**: Automatic content filtering for safety
-5. **Local Storage**: Chat history persisted in browser localStorage
-6. **Streaming Responses**: Real-time AI response streaming
-7. **Citations**: Automatic source citations for search results
+## How It Works
+1. User enters a search query (e.g., "Birkin 25") or selects a brand
+2. Optionally applies price range and sorting filters
+3. System searches the web using Exa API for matching handbag listings
+4. Results are parsed to extract:
+   - Price information
+   - Retailer name
+   - Condition (new, pre-owned, vintage)
+5. Results are displayed in a grid with sorting applied
+
+## Supported Luxury Brands
+- Hermès
+- Chanel
+- Louis Vuitton
+- Gucci
+- Prada
+- Dior
+- Celine
+- Bottega Veneta
+- Balenciaga
+- Saint Laurent
+- Fendi
+- Loewe
+- Chloé
+- Givenchy
+- Valentino
+- Burberry
+- Goyard
+
+## Supported Retailers (auto-detected)
+- Farfetch
+- Net-a-Porter
+- Mytheresa
+- SSENSE
+- Nordstrom
+- Saks Fifth Avenue
+- Neiman Marcus
+- The RealReal (pre-owned)
+- Vestiaire Collective (pre-owned)
+- Rebag (pre-owned)
+- Fashionphile (pre-owned)
+- StockX
+- eBay
+- Official brand websites
 
 ## Technical Stack
 - **Frontend**: Next.js 16, React 19, TypeScript
 - **Styling**: Tailwind CSS 4, shadcn/ui components
-- **AI SDK**: Vercel AI SDK with multiple provider support
-- **State Management**: React hooks, local storage
+- **Search API**: Exa (neural web search)
 - **UI Components**: Radix UI primitives
-- **Animations**: Framer Motion
 - **Icons**: Lucide React
+- **Notifications**: Sonner
 
 ## Development
 
 ### Running the Application
-The application is configured to run automatically via the Next.js Dev Server workflow. It binds to:
-- Host: 0.0.0.0 (allows Replit proxy)
-- Port: 5000 (required for Replit webview)
+The application runs automatically via the Next.js Dev Server workflow on port 5000.
 
-### Customization Guide
-For non-technical customization, edit these files:
-1. **config.ts**: Change AI name, owner name, welcome message, moderation messages
-2. **prompts.ts**: Modify AI behavior, tone, style, and guardrails
+### Adding New Retailers
+Edit `app/api/search-handbags/route.ts` and add to the `retailerMap` object.
 
-### Important Notes for Replit Environment
-- The dev server must run on port 5000 for the webview to work
-- Next.js is configured to allow all origins for server actions (required for Replit's proxy)
-- Chat history is stored in browser localStorage (no database needed)
+### Adding New Brands
+Edit `components/handbags/search-filters.tsx` and add to the `LUXURY_BRANDS` array.
 
 ## User Preferences
 (None documented yet)
 
-## Known Issues
-- Environment variables need to be set up before full functionality is available
-- Application requires OPENAI_API_KEY at minimum to function
+## Known Limitations
+- Price extraction relies on text parsing; some listings may show "Price on request"
+- Results depend on Exa API search quality
+- No product images (would require additional scraping)
+- Pre-owned condition detection is based on URL and text patterns
 
-## Deployment
-The project is configured for Vercel deployment, but can be deployed to other platforms. For production deployment:
-1. Set environment variables in deployment platform
-2. Run `npm run build`
-3. Run `npm run start`
-
-## Links
-- Original deployment documentation mentions Vercel
-- API documentation: See AGENTS.md in project root
+## Future Enhancements
+- Add product images via web scraping
+- Implement saved searches
+- Add price alerts
+- Direct comparison between specific items
+- Historical price tracking

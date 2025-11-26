@@ -117,76 +117,74 @@ function isSpecificProductPage(url: string): boolean {
       return false;
     }
     
-    const categoryOnlyPatterns = [
-      /^\/(women|men|bags|handbags|accessories|shop|collection|category|search|browse|sale|new-arrivals?|designers?)\/?$/,
-      /^\/(women|men)\/(bags|handbags|accessories)\/?$/,
-      /^\/(shop|browse)\/(women|men|bags|handbags)\/?$/,
-    ];
-    
-    if (categoryOnlyPatterns.some(pattern => pattern.test(pathname))) {
-      return false;
-    }
-    
     const pathSegments = pathname.split('/').filter(seg => seg.length > 0);
     
     if (pathSegments.length < 2) {
       return false;
     }
     
-    const lastSegment = pathSegments[pathSegments.length - 1];
-    
-    const productIndicators = [
-      /\d{4,}/,
-      /^[a-z]+-[a-z]+-[a-z0-9-]+$/,
-      /item/i,
-      /product/i,
-      /^p\d+/,
-      /-\d+$/,
-      /sku/i,
+    const categoryOnlyPatterns = [
+      /^\/(women|men|bags|handbags|accessories|shop|collection|category|search|browse|sale|new-arrivals?|designers?)\/?$/,
+      /^\/(women|men)\/(bags|handbags|accessories)\/?$/,
+      /^\/(shop|browse|shopping)\/(women|men|bags|handbags)\/?$/,
+      /^\/(women|men)\/(bags|handbags)\/[a-z-]+\/?$/,
+      /\/search\?/,
+      /\/browse\//,
     ];
     
-    const hasProductIndicator = productIndicators.some(pattern => pattern.test(lastSegment));
+    if (categoryOnlyPatterns.some(pattern => pattern.test(pathname))) {
+      return false;
+    }
     
-    const retailerSpecificPatterns: Record<string, RegExp[]> = {
-      'therealreal.com': [/\/products\//, /\/consignment\//],
-      'fashionphile.com': [/\/product\//, /\/p\//],
-      'rebag.com': [/\/shop\//, /\/product\//],
-      'vestiairecollective.com': [/\/[a-z-]+-\d+\.shtml/, /\/women\/bags\//],
-      'farfetch.com': [/\/shopping\//, /\/item-\d+/],
-      'mytheresa.com': [/\/[a-z-]+-p\d+/, /\/product\//],
-      'net-a-porter.com': [/\/product\//, /\/en\/[a-z]+\/shop\//],
-      'ssense.com': [/\/[a-z]+\/[a-z]+\/product\//],
-      '24s.com': [/\/[a-z-]+-\d+/, /\/product\//],
-      'cettire.com': [/\/[a-z-]+-\d+/, /\/product\//],
+    const fullUrl = pathname;
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    
+    const productIdPatterns = [
+      /\d{5,}/,
+      /-\d{4,}$/,
+      /-\d{4,}\./,
+      /item-\d+/i,
+      /-p\d{3,}/i,
+      /\/p\/[a-z0-9]+/i,
+      /sku[=:][a-z0-9]+/i,
+      /productid[=:]\d+/i,
+      /\.shtml$/,
+      /-[a-f0-9]{8,}/i,
+    ];
+    
+    const hasProductId = productIdPatterns.some(pattern => pattern.test(fullUrl) || pattern.test(lastSegment));
+    
+    if (hasProductId) {
+      return true;
+    }
+    
+    const retailerProductPatterns: Record<string, RegExp> = {
+      'therealreal.com': /\/products\/[^\/]+\/[^\/]+\/[^\/]+-\d+/,
+      'fashionphile.com': /\/(product|p)\/[a-z0-9-]+-\d+/,
+      'rebag.com': /\/infinity\/[a-z0-9-]+|\/clair\/[a-z0-9-]+/,
+      'vestiairecollective.com': /[a-z-]+-\d+\.shtml/,
+      'farfetch.com': /\/shopping\/[^\/]+\/item-\d+/,
+      'mytheresa.com': /[a-z-]+-p\d+/,
+      'net-a-porter.com': /\/product\/\d+/,
+      'ssense.com': /\/[a-z]+\/[a-z]+\/[a-z0-9-]+-\d+/,
+      '24s.com': /[a-z-]+-\d{5,}/,
+      'cettire.com': /[a-z-]+-\d{5,}/,
     };
     
-    for (const [domain, patterns] of Object.entries(retailerSpecificPatterns)) {
+    for (const [domain, pattern] of Object.entries(retailerProductPatterns)) {
       if (hostname.includes(domain)) {
-        if (patterns.some(pattern => pattern.test(pathname))) {
-          return true;
-        }
+        return pattern.test(pathname);
       }
     }
     
-    if (hasProductIndicator) {
-      return true;
-    }
+    const genericProductIndicators = [
+      /\/product\/[a-z0-9-]+$/i,
+      /\/item\/[a-z0-9-]+$/i,
+      /\/p\/[a-z0-9]+$/i,
+      /[a-z]+-[a-z]+-[a-z0-9]+-\d{3,}$/,
+    ];
     
-    if (pathSegments.length >= 3) {
-      const hasCategory = pathSegments.some(seg => 
-        ['bags', 'handbags', 'women', 'shop', 'products', 'shopping'].includes(seg)
-      );
-      const hasUniqueId = /[a-z]+-[a-z0-9]+-[a-z0-9]+/.test(lastSegment) || /\d{3,}/.test(lastSegment);
-      if (hasCategory && hasUniqueId) {
-        return true;
-      }
-    }
-    
-    if (pathSegments.length >= 4) {
-      return true;
-    }
-    
-    return false;
+    return genericProductIndicators.some(pattern => pattern.test(pathname));
   } catch {
     return false;
   }

@@ -141,7 +141,7 @@ const DEMO_RESULTS: HandbagResult[] = [
     price: 12500,
     priceText: '$12,500',
     currency: 'USD',
-    imageUrl: 'https://placehold.co/400x400/8B5CF6/FFFFFF?text=HE',
+    imageUrl: 'https://placehold.co/400x500/D97706/FFFFFF?text=HE&font=playfair-display',
     productUrl: 'https://www.hermes.com',
     sourceSite: 'Hermès',
     brand: 'Hermès',
@@ -153,7 +153,7 @@ const DEMO_RESULTS: HandbagResult[] = [
     price: 9500,
     priceText: '$9,500',
     currency: 'USD',
-    imageUrl: 'https://placehold.co/400x400/EC4899/FFFFFF?text=CH',
+    imageUrl: 'https://placehold.co/400x500/1c1917/FFFFFF?text=CH&font=playfair-display',
     productUrl: 'https://www.chanel.com',
     sourceSite: 'Chanel',
     brand: 'Chanel',
@@ -165,7 +165,7 @@ const DEMO_RESULTS: HandbagResult[] = [
     price: 2030,
     priceText: '$2,030',
     currency: 'USD',
-    imageUrl: 'https://placehold.co/400x400/F59E0B/FFFFFF?text=LV',
+    imageUrl: 'https://placehold.co/400x500/92400e/FFFFFF?text=LV&font=playfair-display',
     productUrl: 'https://www.louisvuitton.com',
     sourceSite: 'Louis Vuitton',
     brand: 'Louis Vuitton',
@@ -358,6 +358,29 @@ export async function POST(request: NextRequest) {
       const { price, priceText, currency: detectedCurrency } = extractPrice(result.text || '');
       const detectedBrand = extractBrand(result.text || '', result.title || '');
       
+      let imageUrl = '';
+      if (result.image) {
+        imageUrl = result.image;
+      } else {
+        const brandColors: Record<string, string> = {
+          'Hermès': 'D97706',
+          'Chanel': '1c1917',
+          'Louis Vuitton': '92400e',
+          'Gucci': '166534',
+          'Prada': '1e1b4b',
+          'Dior': '831843',
+          'Céline': 'a16207',
+          'Bottega Veneta': '365314',
+          'Balenciaga': '1f2937',
+          'Saint Laurent': '0f172a',
+          'Fendi': 'b45309',
+          'Loewe': '7c2d12',
+        };
+        const color = brandColors[detectedBrand || ''] || '78716c';
+        const initials = (detectedBrand || 'LX').substring(0, 2).toUpperCase();
+        imageUrl = `https://placehold.co/400x500/${color}/FFFFFF?text=${initials}&font=playfair-display`;
+      }
+      
       return {
         id: `handbag-${index}-${Date.now()}`,
         title: result.title || 'Luxury Handbag',
@@ -365,7 +388,7 @@ export async function POST(request: NextRequest) {
         price,
         priceText,
         currency: currency && currency !== 'all' ? currency : detectedCurrency,
-        imageUrl: generatePlaceholderImage(detectedBrand, index),
+        imageUrl,
         productUrl: result.url,
         sourceSite: extractSourceSite(result.url),
         brand: detectedBrand,

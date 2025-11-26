@@ -1,7 +1,6 @@
 "use client";
 
 import { ExternalLink, ShoppingBag } from "lucide-react";
-import Image from "next/image";
 
 export interface HandbagResult {
   id: string;
@@ -39,46 +38,64 @@ export function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div 
-      className="group relative bg-gradient-to-b from-gray-800/80 to-gray-900/90 rounded-2xl overflow-hidden backdrop-blur-sm border border-white/10 hover:border-purple-500/50 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-purple-500/20 cursor-pointer"
+      className="group relative bg-white rounded-xl overflow-hidden border border-stone-200 hover:border-stone-300 transition-all duration-500 hover:shadow-xl cursor-pointer"
       onClick={handleClick}
     >
-      <div className="relative aspect-square overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="relative aspect-[4/5] overflow-hidden bg-stone-100">
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
         <img
           src={product.imageUrl}
           alt={product.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            const brandColors: Record<string, string> = {
+              'Hermès': 'F97316',
+              'Chanel': '1c1917',
+              'Louis Vuitton': '92400e',
+              'Gucci': '166534',
+              'Prada': '1e1b4b',
+              'Dior': '831843',
+              'Céline': 'a16207',
+              'Bottega Veneta': '365314',
+              'Balenciaga': '1f2937',
+              'Saint Laurent': '0f172a',
+              'Fendi': 'b45309',
+              'Loewe': '7c2d12',
+            };
+            const color = brandColors[product.brand || ''] || '78716c';
+            const initials = (product.brand || 'LX').substring(0, 2).toUpperCase();
+            target.src = `https://placehold.co/400x500/${color}/FFFFFF?text=${initials}&font=playfair-display`;
+          }}
         />
         {product.brand && (
-          <div className="absolute top-3 left-3 z-20">
-            <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-white text-xs font-medium rounded-full border border-white/20">
+          <div className="absolute top-4 left-4 z-20">
+            <span className="px-3 py-1.5 bg-white/95 backdrop-blur-sm text-stone-900 text-xs font-medium tracking-wide uppercase rounded-full shadow-sm">
               {product.brand}
             </span>
           </div>
         )}
-        <div className="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="p-2 bg-white/10 backdrop-blur-md rounded-full">
-            <ExternalLink className="w-4 h-4 text-white" />
+        <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+          <div className="p-2.5 bg-white/95 backdrop-blur-sm rounded-full shadow-sm">
+            <ExternalLink className="w-4 h-4 text-stone-700" />
           </div>
         </div>
       </div>
       
-      <div className="p-4 space-y-3">
-        <h3 className="font-semibold text-white line-clamp-2 group-hover:text-purple-300 transition-colors duration-300">
-          {product.title}
-        </h3>
+      <div className="p-5 space-y-3">
+        <div>
+          <h3 className="font-medium text-stone-900 line-clamp-2 group-hover:text-amber-800 transition-colors duration-300 leading-snug">
+            {product.title}
+          </h3>
+          <p className="text-xs text-stone-400 mt-1 uppercase tracking-wide">
+            {product.sourceSite}
+          </p>
+        </div>
         
-        <p className="text-sm text-gray-400 line-clamp-2">
-          {product.description}
-        </p>
-        
-        <div className="flex items-center justify-between pt-2">
+        <div className="flex items-end justify-between pt-2 border-t border-stone-100">
           <div>
-            <p className="text-xl font-bold text-white">
+            <p className="text-xl font-semibold text-stone-900">
               {formatPrice(product.price, product.currency)}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              {product.sourceSite}
             </p>
           </div>
           
@@ -87,7 +104,7 @@ export function ProductCard({ product }: ProductCardProps) {
               e.stopPropagation();
               handleClick();
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-sm font-medium rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30"
+            className="flex items-center gap-2 px-4 py-2.5 bg-stone-900 hover:bg-stone-800 text-white text-sm font-medium rounded-lg transition-all duration-300 hover:shadow-md"
           >
             <ShoppingBag className="w-4 h-4" />
             View
@@ -100,19 +117,15 @@ export function ProductCard({ product }: ProductCardProps) {
 
 export function ProductCardSkeleton() {
   return (
-    <div className="bg-gradient-to-b from-gray-800/80 to-gray-900/90 rounded-2xl overflow-hidden backdrop-blur-sm border border-white/10 animate-pulse">
-      <div className="aspect-square bg-gray-700/50" />
-      <div className="p-4 space-y-3">
-        <div className="h-5 bg-gray-700/50 rounded w-full" />
-        <div className="h-5 bg-gray-700/50 rounded w-3/4" />
-        <div className="h-4 bg-gray-700/50 rounded w-full" />
-        <div className="h-4 bg-gray-700/50 rounded w-2/3" />
-        <div className="flex items-center justify-between pt-2">
-          <div>
-            <div className="h-6 bg-gray-700/50 rounded w-20" />
-            <div className="h-3 bg-gray-700/50 rounded w-16 mt-2" />
-          </div>
-          <div className="h-10 bg-gray-700/50 rounded-full w-20" />
+    <div className="bg-white rounded-xl overflow-hidden border border-stone-200 animate-pulse">
+      <div className="aspect-[4/5] bg-stone-200" />
+      <div className="p-5 space-y-3">
+        <div className="h-5 bg-stone-200 rounded w-full" />
+        <div className="h-5 bg-stone-200 rounded w-3/4" />
+        <div className="h-3 bg-stone-100 rounded w-20 mt-2" />
+        <div className="flex items-center justify-between pt-3 border-t border-stone-100">
+          <div className="h-6 bg-stone-200 rounded w-24" />
+          <div className="h-10 bg-stone-200 rounded-lg w-20" />
         </div>
       </div>
     </div>

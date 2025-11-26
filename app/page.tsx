@@ -89,65 +89,67 @@ export default function ExplorePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-purple-950">
+    <div className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-stone-100">
       <Toaster 
         position="top-center" 
         richColors 
         toastOptions={{
           style: {
-            background: 'rgba(17, 24, 39, 0.9)',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            color: 'white',
+            background: 'white',
+            border: '1px solid #e7e5e4',
+            color: '#1c1917',
           },
         }}
       />
       
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-r from-purple-500/5 to-pink-500/5 rounded-full blur-3xl" />
-      </div>
-      
-      <header className="relative z-10 border-b border-white/5 backdrop-blur-xl bg-gray-900/30">
+      <header className="border-b border-stone-200 bg-white/80 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/30">
+              <div className="w-12 h-12 bg-gradient-to-br from-stone-900 to-stone-700 rounded-xl flex items-center justify-center shadow-lg">
                 <ShoppingBag className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-white">Luxury Handbag Explorer</h1>
-                <p className="text-sm text-gray-400">Search popular handbags across multiple stores</p>
+                <h1 className="text-xl font-serif font-semibold text-stone-900 tracking-tight">Luxury Handbag Explorer</h1>
+                <p className="text-sm text-stone-500">Discover designer bags across premium retailers</p>
               </div>
             </div>
             
-            <div className="hidden md:flex items-center gap-2 text-sm text-gray-400">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              <span>Powered by AI</span>
+            <div className="hidden md:flex items-center gap-2 text-sm text-stone-500">
+              <Sparkles className="w-4 h-4 text-amber-600" />
+              <span className="font-medium">Powered by AI</span>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <form onSubmit={handleSearch} className="mb-6">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-2xl blur-xl" />
-            <div className="relative flex gap-3 bg-gray-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-2">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="text-center mb-10">
+          <h2 className="text-3xl md:text-4xl font-serif font-light text-stone-900 mb-3">
+            Find Your Perfect Bag
+          </h2>
+          <p className="text-stone-500 max-w-2xl mx-auto">
+            Search across hundreds of luxury retailers to discover the finest designer handbags from the world's most prestigious fashion houses.
+          </p>
+        </div>
+
+        <form onSubmit={handleSearch} className="mb-8">
+          <div className="relative max-w-3xl mx-auto">
+            <div className="flex gap-3 bg-white border border-stone-200 rounded-2xl p-2 shadow-sm hover:shadow-md transition-shadow">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
                 <input
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search for 'black tote', 'crossbody', 'Gucci style', etc..."
-                  className="w-full h-14 pl-12 pr-4 bg-gray-800/50 border border-white/5 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                  placeholder="Search for 'Birkin', 'Classic Flap', 'Neverfull'..."
+                  className="w-full h-14 pl-12 pr-4 bg-stone-50 border border-stone-100 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500/50 transition-all"
                 />
               </div>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="h-14 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="h-14 px-8 bg-stone-900 hover:bg-stone-800 text-white font-medium rounded-xl transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isLoading ? (
                   <>
@@ -181,18 +183,19 @@ export default function ExplorePage() {
         />
       </main>
 
-      <footer className="relative z-10 border-t border-white/5 mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <footer className="border-t border-stone-200 mt-20 bg-stone-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center">
-                <ShoppingBag className="w-4 h-4 text-white" />
+              <div className="w-10 h-10 bg-gradient-to-br from-stone-900 to-stone-700 rounded-lg flex items-center justify-center">
+                <ShoppingBag className="w-5 h-5 text-white" />
               </div>
-              <span className="text-sm text-gray-400">
-                Luxury Handbag Explorer - Discover designer bags across the web
-              </span>
+              <div>
+                <span className="font-serif font-medium text-stone-900">Luxury Handbag Explorer</span>
+                <p className="text-xs text-stone-500">Your gateway to premium fashion</p>
+              </div>
             </div>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-stone-400">
               © {new Date().getFullYear()} All rights reserved
             </p>
           </div>

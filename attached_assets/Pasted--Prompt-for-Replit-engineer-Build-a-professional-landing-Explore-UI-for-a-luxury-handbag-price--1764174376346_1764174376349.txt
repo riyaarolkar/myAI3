@@ -1,0 +1,249 @@
+# Prompt for Replit engineer — Build a professional landing + Explore UI for a luxury-handbag price-aggregator
+
+We’re building a **price-aggregator for luxury handbags** (scraping multiple premium retailers). You’ll implement a modern, production-ready landing page + “Explore” gallery UI that mirrors the quality of the screenshots attached (hero search & filters like the first image, and an Explore grid in the style of Chrono24). Use the following spec exactly.
+
+---
+
+## Tech stack (required)
+
+* Frontend: **Next.js (app router)** + **React** + **Tailwind CSS** (Tailwind for utility-first styling)
+* Hosting: **Vercel**
+* Backend serverless endpoints: Next API routes (deployed to Vercel)
+* Vector DB: **Pinecone** for embeddings & fast product similarity
+* LLM: **OpenAI** (for embeddings + optional copy generation)
+* Scraping: external scrapers or serverless scrapers (examples: Playwright, Puppeteer, or third-party scraping microservices). Scrapers must return canonical product metadata and original product image URL (no thumbnails).
+* Storage / caching: edge cache / CDN (Vercel), and Redis or in-memory cache for expensive scrapes (optional).
+* Analytics & error reporting: Sentry (or similar)
+
+> Implement accessibility (WCAG), responsive design (mobile-first), progressive enhancement, and SEO basics (meta tags, SSR for initial content).
+
+---
+
+## UX / UI Requirements
+
+### 1) Landing / Hero area
+
+* Large centered heading: “Find Your Perfect Bag”
+* Subheading: single-sentence describing the service (discover designer bags across premium retailers).
+* Prominent **search bar** in hero: placeholder text “Search brands, models (e.g. Birkin), keywords…”
+* Search button with magnifier icon.
+* Beneath the search bar: a compact “Filters” area collapsed by default (expandable panel).
+
+### 2) Explore page / Gallery (Chrono24-style)
+
+* Grid of cards with tiles (responsive: 1 column on small screens, 2–3 medium, 4 on large).
+* Each card shows:
+
+  * Top-left brand pill (e.g., HERMÈS).
+  * Large image area (use the exact product image URL scraped from the original retailer).
+  * Title and seller (retailer) name.
+  * Price (or “Price on request” if not available).
+  * Primary CTA: **View** button that opens the original product page in a new tab (direct link to the retailer’s product URL).
+* Images must be lazy-loaded and responsive (use `next/image` or native `loading="lazy"` with `srcset`).
+* If the same product appears from multiple retailers, show multiple cards (one per listing), but provide a compact “compare” checkbox on each card.
+
+### 3) Search & Filter behavior
+
+* Search bar triggers a query to `/api/search?q=...` with additional filter params.
+* Filters (multi-select where applicable):
+
+  * **Brands** (multi-select; show popular brands first)
+  * **Country** (retailer country or listing country)
+  * **Price range** (min / max numeric inputs + slider)
+  * **Currency** (dropdown: INR, USD, JPY, GBP, CHF (Swiss franc))
+  * **Bag type** (multi-select: tote, shoulder, crossbody, clutch, top-handle, satchel, hobo, backpack, etc.)
+* Currency handling:
+
+  * Accept `currency` param; display prices converted into the selected currency.
+  * Use a server-side exchange rate service (free/open API or cached exchange rates). Provide an interface to swap currency and re-render prices.
+* Filters should be combined (AND logic) and support server-side pagination.
+
+### 4) Product card specifics (data model)
+
+Each card must be backed by the following JSON schema from the search API:
+
+```json
+{
+  "id": "string",
+  "title": "string",
+  "brand": "string",
+  "bag_type": "string",
+  "retailer": "string",
+  "retailer_country": "string",
+  "price": {"amount": number | null, "currency": "USD" | ...},
+  "price_display": "string",
+  "image_url": "https://...",
+  "product_url": "https://...",       // direct retailer product page
+  "scraped_at": "ISO8601",
+  "attributes": {"color": "...", "size": "...", ...}
+}
+```
+
+* `image_url` must be the original high-resolution image URL returned by the scraper (no placeholder or stock images).
+* The **View** CTA uses `product_url` and opens in a new tab with `rel="noopener noreferrer"`.
+
+### 5) Performance & quality
+
+* Use SSR for initial search/explore content to help SEO and first paint.
+* Use lazy-loading, image optimization, and proper caching headers.
+* Implement client-side infinite scroll or progressive pagination (configurable); ensure server-side pagination is available.
+* Avoid blocking the main thread for scraping: API endpoints return cached results quickly; if data is stale or missing, show a graceful loading UI and use a background scrape job (webhook or cron) to update results.
+* Provide clear error and empty states (e.g., "No results found — try widening filters.").
+
+---
+
+## Backend / API Requirements
+
+### Endpoints (examples)
+
+* `GET /api/search?q=&brands=&bag_type=&country=&min_price=&max_price=&currency=&page=&per_page=`
+
+  * Returns paginated JSON of listing cards (matching schema above). Must accept `currency` param for on-the-fly conversion.
+  * Support server-side sorting and filters.
+* `POST /api/scrape` (internal / protected)
+
+  * Accepts `url` and returns scraped metadata (title, price, currency, image_url, product_url, attributes). This endpoint must be protected by a server-side secret (only internal jobs or trusted workers call it).
+* `GET /api/explore` — returns curated categories (like the Chrono24 tiles) for the Explore page, each category contains sample images and links to filtered search results.
+
+### Pinecone usage
+
+* Use OpenAI embeddings to index product descriptions/attributes for similarity search.
+* Pinecone index schema:
+
+  * `id` = product unique id
+  * `vector` = embedding of `title + brand + attributes`
+  * metadata = JSON with `brand`, `retailer`, `price.amount`, `currency`, `image_url`, `product_url`, `bag_type`, `retailer_country`, `scraped_at`
+* Use Pinecone for queries like “show similar bags” or “find other sellers of this bag”.
+* Provide a server function `querySimilar(productId, topK)` that:
+
+  1. Looks up product metadata and embedding
+  2. Queries Pinecone for topK nearest vectors
+  3. Returns the listings with direct `product_url` and `image_url`
+
+### Scraper contract
+
+* Scrapers must return exact values for `image_url` and `product_url` (no proxied thumbnails unless original is unavailable).
+* If `image_url` is relative, scrapers must normalize to absolute.
+* Scrapers must provide currency and numeric price if available; if a site hides price, set `price.amount` to `null` and `price_display` to `"Price on request"`.
+* Include `scraped_at` timestamp.
+
+### Security & rate-limiting
+
+* Protect scraping endpoints and any internal-only endpoints with API keys or server-only tokens.
+* Implement rate-limits on public search endpoints (to prevent heavy automated scraping).
+* Sanitize all scraped inputs and avoid rendering raw HTML from external sites.
+
+---
+
+## UI Components & File Structure (suggested)
+
+* `app/page.tsx` — Landing / hero search
+* `app/explore/page.tsx` — Explore grid
+* `components/SearchBar.tsx`
+* `components/FiltersPanel.tsx`
+* `components/ProductCard.tsx`
+* `components/BrandPill.tsx`
+* `lib/api.ts` — client wrapper to call `/api/*`
+* `lib/pinecone.ts` — server-side Pinecone helpers
+* `pages/api/search.ts` — search API
+* `pages/api/scrape.ts` — scraper endpoint (internal)
+* `styles/globals.css` — Tailwind + design tokens
+* `utils/currency.ts` — currency conversion helper with caching
+
+---
+
+## Visual / Interaction details
+
+* Use a calm, luxury color palette: deep brown/black for CTAs, off-white backgrounds, muted accent orange (like Hermes) — but keep neutral enough for many brands.
+* Card corners: rounded (2xl) with soft shadows.
+* Buttons: pill-shaped primary CTA, subtle hover states, keyboard focus ring visible.
+* Brand pill: small rounded white pill with brand text in uppercase and subtle shadow.
+* Provide small animation on hover (scale card 1.02 and elevate shadow).
+* All images must have `alt` text derived from product title + brand (e.g., “Hermès Birkin 30 Togo leather — Brown”).
+
+---
+
+## Acceptance criteria (what “done” looks like)
+
+1. Landing page loads first content server-side and shows the hero search UI and a collapsed “Filters” panel.
+2. Explore page shows a grid with categories and sample product cards; images come from the real `image_url` returned by the API.
+3. Searching from the hero calls `/api/search` and returns results with filter controls that work (brands, country, price range, currency, bag type).
+4. Clicking **View** opens the original retailer `product_url` in a new tab.
+5. Product cards use the exact scraped `image_url` and lazy-load. If unavailable, show a tasteful placeholder.
+6. Pinecone index is written to on ingestion and can return `similar` results for a product.
+7. The app handles missing prices (shows “Price on request”) and can convert prices to selected currency.
+8. The repo contains a README with:
+
+   * environment variables needed (PINECONE_API_KEY, PINECONE_ENV, OPENAI_API_KEY, EXCHANGE_RATES_API_KEY, SCRAPER_SECRET, NEXT_PUBLIC_SOME_VAR),
+   * local dev + deploy steps to Vercel,
+   * sample cURL commands for API endpoints,
+   * and a list of tests to run (basic integration tests).
+
+---
+
+## Example search API response (for frontend dev)
+
+```json
+{
+  "page": 1,
+  "per_page": 12,
+  "total": 234,
+  "results": [
+    {
+      "id": "sothebys-123456",
+      "title": "Birkin Bag Fashion Sotheby's",
+      "brand": "Hermès",
+      "bag_type": "top-handle",
+      "retailer": "Sothebys",
+      "retailer_country": "UK",
+      "price": {"amount": null, "currency": "USD"},
+      "price_display": "Price on request",
+      "image_url": "https://sothebys.com/images/abcd1234.jpg",
+      "product_url": "https://sothebys.com/lot/1234",
+      "scraped_at": "2025-01-01T12:00:00Z",
+      "attributes": {"color":"tan", "size":"30cm"}
+    }
+  ]
+}
+```
+
+---
+
+## Testing & QA
+
+* Unit tests for components (React Testing Library), at least smoke tests for `SearchBar`, `ProductCard`, `FiltersPanel`.
+* Integration test for `GET /api/search` returning expected schema (Jest + supertest or equivalent).
+* E2E scenario (Playwright): search for “Birkin”, apply Brand=Hermès, verify results include brand pill and View links open externally.
+
+---
+
+## Deliverables
+
+1. Fully functioning Next.js repo matching the file structure above.
+2. `README.md` with env var list, run steps, Vercel deploy guide, and API docs.
+3. Minimal seed data + one or two mock scrapers for dev (JSON fixtures).
+4. Pinecone helper and example ingestion script to index scraped items.
+5. Basic tests described above.
+
+---
+
+## Notes for the engineer
+
+* Prioritize **data fidelity**: the image displayed must be the same image URL returned by the scraper for that listing (no replacement). If scraping returns multiple images, pick the one flagged as primary; if none flagged, use the first.
+* Make image fetching resilient to CORS: either load images server-side and proxy to our CDN or instruct the scraper to return absolute CDN-friendly URLs if necessary.
+* Keep the UX lightweight and fast — avoid heavy client-side rendering for the Explore landing page.
+
+---
+
+### Final instruction (copy-paste for Replit or for the dev)
+
+> Build the UI and server endpoints as described above. Follow the API contracts exactly, ensure `image_url` is used as the product image, and ensure the **View** button opens the `product_url`. Use Next.js + Tailwind, host on Vercel, and wire Pinecone + OpenAI embeddings for similarity. Deliver the repo with README and tests.
+
+---
+
+If you want, I can now generate:
+
+* A ready-to-run `README.md` with environment variables and Vercel settings, or
+* A starter Next.js/Tailwind skeleton code (components + example API mocks) that you can drop into Replit.
+
+Which one do you want included next?

@@ -30,10 +30,10 @@ function getDateAndTime(): string {
 
 export const DATE_AND_TIME = getDateAndTime();
 
-export const AI_NAME = "LuxeBag Finder";
+export const AI_NAME = "Luxury Handbag Explorer";
 export const OWNER_NAME = "Riya Arolkar";
 
-export const WELCOME_MESSAGE = `Welcome to ${AI_NAME}! Find the best deals on luxury handbags.`
+export const WELCOME_MESSAGE = `Welcome to ${AI_NAME}! Discover designer handbags across multiple stores.`
 
 export const CLEAR_CHAT_TEXT = "New Search";
 

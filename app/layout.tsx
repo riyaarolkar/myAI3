@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LuxeBag Finder - Compare Luxury Handbag Prices",
-  description: "Find the best deals on luxury handbags. Compare prices across multiple retailers for designer bags from Hermès, Chanel, Louis Vuitton, and more.",
+  title: "Luxury Handbag Explorer - Discover Designer Bags",
+  description: "Explore and discover luxury handbags from top designers. Search across multiple stores for Hermès, Chanel, Louis Vuitton, Gucci, and more.",
 };
 
 export default function RootLayout({

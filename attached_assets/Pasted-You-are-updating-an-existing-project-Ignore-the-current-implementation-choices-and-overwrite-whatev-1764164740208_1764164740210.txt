@@ -1,0 +1,67 @@
+You are updating an existing project. Ignore the current implementation choices and overwrite whatever is needed so that the app behaves exactly as described below.
+
+Goal:
+Turn this project into a “Luxury Handbag Explorer” web app with:
+1) an Explore page (like Sora / Instagram Explore),
+2) live web search for handbags using web scraping,
+3) clickable product cards that link out to the original product pages.
+
+Data & scraping (behavior, not implementation details):
+- The app should be able to search for luxury handbags across multiple online stores, not restricted to a single website.
+- For each search, return up to 10 handbag results in total.
+- Each result must include:
+  • Product name / short description  
+  • Price  
+  • Main image URL  
+  • Direct product link (URL to the original store page)  
+  • Source site name
+- Scraping and data collection should only target websites that allow this under their robots.txt / terms of use. If needed, you can start with public demo / test e-commerce sites but keep the structure ready so real handbag sources can be plugged in later.
+- If some sites fail, the app should still work using results from other sites (no crashes).
+
+API / behavior:
+- There should be a way for the frontend to:
+  1) Load a default “Explore” view with popular handbags (e.g., a default query like “handbag”).
+  2) Send a search query (like “black tote”, “crossbody”, etc.) and get up to 10 matching handbag results back in a simple, consistent JSON-like format with the fields mentioned above.
+- If no results are found, the app should respond cleanly and the UI should show a friendly “No handbags found, try a different search” type message.
+
+UI requirements (3-column Sora-style Explore page):
+- When I open the app, I should see:
+  • A header with the title “Luxury Handbag Explorer” and a short subtitle like “Search popular handbags across multiple stores.”
+-	I also want filters for –  COUNTRY, CURRENCY, PRICE RANGE, BRAND, TYPES OF HANDBAG
+  • A large search bar at the top with:
+      - Placeholder text like: “Search for ‘black tote’, ‘crossbody’, ‘Gucci style’, etc…”
+      - A search button.
+      - Pressing Enter should also trigger the search.
+  • Below the search bar, an Explore grid that automatically shows 10 handbags using the default query (without me typing anything).
+- Layout:
+  • Desktop: 3 columns of cards (Explore-style grid).
+  • Tablet: 2 columns.
+  • Mobile: 1 column.
+- Each card must show, in this order:
+  1) The product image on top (full width, nicely cropped, with rounded corners).
+  2) Product name / short description (truncate if it’s too long).
+  3) Price, clearly visible (e.g., bold) (
+  4) Source site name (smaller text).
+  5) A way to click through to the original product:
+      - The image itself should be clickable and open the product page in a new tab.
+      - Additionally, include a small “View product” link or button that also opens the product page in a new tab.
+- Styling:
+  • Dark, modern theme (e.g., deep gradient background).
+  • Cards should have subtle hover effects (slight lift/scale and a soft glow or shadow).
+  • Smooth transitions when hovering over cards.
+  • Overall feel should be similar to a Sora / Instagram Explore gallery for handbags.
+
+Search interaction:
+- When I type a query and hit the search button or press Enter:
+  • The Explore grid should update without a full page reload.
+  • While the app is waiting for results, show a simple loading indicator like “Searching…” or a spinner.
+  • When results arrive, clear the old cards and show the new ones.
+- If an error happens on the data side, show a simple error message on the UI instead of breaking the page.
+
+Summary of what you must deliver:
+- Overwrite or extend the existing code so that:
+  • Opening the app shows a 3-column Explore page with 10 handbag cards using a default search.
+  • I can type a handbag-related search term and see up to 10 matching handbag cards.
+  • Each card always shows image, product name/description, price, source, and a working clickable link to the original product page.
+- Focus on a clean, working experience end-to-end rather than preserving the old code.
+

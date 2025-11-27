@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Toaster, toast } from "sonner";
-import { Search, Sparkles, ShoppingBag, ArrowRight } from "lucide-react";
+import { Search, Sparkles, ShoppingBag, ArrowRight, MessageCircle, Lightbulb } from "lucide-react";
 import { ExploreFilters, FilterValues } from "@/components/handbags/explore-filters";
 import { ExploreGrid } from "@/components/handbags/explore-grid";
 import { HandbagResult } from "@/components/handbags/product-card";
-import { parseConversationalQuery } from "@/lib/parse-query";
 import Link from "next/link";
 
 interface ExploreCategory {
@@ -17,6 +16,20 @@ interface ExploreCategory {
   filter_url: string;
 }
 
+interface ConciergeResponse {
+  message: string;
+  tip: string | null;
+  filters: {
+    brand?: string | null;
+    color?: string | null;
+    maxPrice?: number | null;
+    minPrice?: number | null;
+    bagType?: string | null;
+    occasion?: string | null;
+  };
+  searchQuery: string;
+}
+
 export default function LandingPage() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<HandbagResult[]>([]);
@@ -24,6 +37,8 @@ export default function LandingPage() {
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<ExploreCategory[]>([]);
+  const [conciergeResponse, setConciergeResponse] = useState<ConciergeResponse | null>(null);
+  const [isThinking, setIsThinking] = useState(false);
   const [filters, setFilters] = useState<FilterValues>({
     country: "all",
     currency: "all",
@@ -91,46 +106,71 @@ export default function LandingPage() {
     }
   };
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!query.trim()) {
+      setConciergeResponse(null);
       performSearch("luxury designer handbag");
       return;
     }
 
-    const parsed = parseConversationalQuery(query);
-    
-    const updatedFilters: FilterValues = { ...filters };
-    
-    if (parsed.brand) {
-      updatedFilters.brand = parsed.brand;
-    }
-    if (parsed.bagType) {
-      updatedFilters.bagType = parsed.bagType;
-    }
-    if (parsed.maxPrice) {
-      if (parsed.maxPrice <= 1000) {
-        updatedFilters.priceRange = "0-1000";
-      } else if (parsed.maxPrice <= 2500) {
-        updatedFilters.priceRange = "1000-2500";
-      } else if (parsed.maxPrice <= 5000) {
-        updatedFilters.priceRange = "2500-5000";
-      } else if (parsed.maxPrice <= 10000) {
-        updatedFilters.priceRange = "5000-10000";
+    setIsThinking(true);
+    setConciergeResponse(null);
+    setHasSearched(true);
+    setIsLoading(true);
+
+    try {
+      const conciergeRes = await fetch("/api/concierge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: query }),
+      });
+
+      if (conciergeRes.ok) {
+        const data: ConciergeResponse = await conciergeRes.json();
+        setConciergeResponse(data);
+
+        const updatedFilters: FilterValues = { ...filters };
+        
+        if (data.filters.brand) {
+          updatedFilters.brand = data.filters.brand;
+        }
+        if (data.filters.bagType) {
+          updatedFilters.bagType = data.filters.bagType;
+        }
+        if (data.filters.maxPrice) {
+          if (data.filters.maxPrice <= 1000) {
+            updatedFilters.priceRange = "0-1000";
+          } else if (data.filters.maxPrice <= 2500) {
+            updatedFilters.priceRange = "1000-2500";
+          } else if (data.filters.maxPrice <= 5000) {
+            updatedFilters.priceRange = "2500-5000";
+          } else if (data.filters.maxPrice <= 10000) {
+            updatedFilters.priceRange = "5000-10000";
+          } else {
+            updatedFilters.priceRange = "10000-";
+          }
+        }
+        
+        setFilters(updatedFilters);
+        setIsThinking(false);
+
+        let searchQuery = data.searchQuery || query;
+        if (data.filters.color) {
+          searchQuery = `${data.filters.color} ${searchQuery}`;
+        }
+        
+        await performSearch(searchQuery, updatedFilters);
       } else {
-        updatedFilters.priceRange = "10000-";
+        setIsThinking(false);
+        performSearch(query);
       }
+    } catch (err) {
+      console.error("Concierge error:", err);
+      setIsThinking(false);
+      performSearch(query);
     }
-    
-    setFilters(updatedFilters);
-    
-    let enhancedQuery = parsed.searchText;
-    if (parsed.color) {
-      enhancedQuery = `${parsed.color} ${enhancedQuery}`;
-    }
-    
-    performSearch(enhancedQuery, updatedFilters);
   };
 
   const handleApplyFilters = () => {
@@ -224,6 +264,55 @@ export default function LandingPage() {
             </div>
           </div>
         </form>
+
+        {isThinking && (
+          <div className="max-w-3xl mx-auto mb-6">
+            <div className="bg-gradient-to-r from-amber-50 to-stone-50 border border-amber-200/50 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <MessageCircle className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-sm font-medium text-amber-800">Your Personal Concierge</span>
+                    <div className="flex gap-1">
+                      <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                      <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                      <div className="w-2 h-2 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                    </div>
+                  </div>
+                  <p className="text-stone-600 text-sm">Thinking about your perfect bag...</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {conciergeResponse && !isThinking && (
+          <div className="max-w-3xl mx-auto mb-6">
+            <div className="bg-gradient-to-r from-amber-50 to-stone-50 border border-amber-200/50 rounded-2xl p-5 shadow-sm">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+                  <MessageCircle className="w-5 h-5 text-white" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-sm font-medium text-amber-800">Your Personal Concierge</span>
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  </div>
+                  <p className="text-stone-700 leading-relaxed">{conciergeResponse.message}</p>
+                  
+                  {conciergeResponse.tip && (
+                    <div className="mt-3 flex items-start gap-2 bg-white/60 rounded-xl px-4 py-3 border border-amber-100">
+                      <Lightbulb className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-stone-600 italic">{conciergeResponse.tip}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="mb-8">
           <ExploreFilters

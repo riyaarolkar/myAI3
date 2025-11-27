@@ -6,6 +6,7 @@ import { Search, Sparkles, ShoppingBag, ArrowRight } from "lucide-react";
 import { ExploreFilters, FilterValues } from "@/components/handbags/explore-filters";
 import { ExploreGrid } from "@/components/handbags/explore-grid";
 import { HandbagResult } from "@/components/handbags/product-card";
+import { parseConversationalQuery } from "@/lib/parse-query";
 import Link from "next/link";
 
 interface ExploreCategory {
@@ -92,7 +93,44 @@ export default function LandingPage() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    performSearch(query);
+    
+    if (!query.trim()) {
+      performSearch("luxury designer handbag");
+      return;
+    }
+
+    const parsed = parseConversationalQuery(query);
+    
+    const updatedFilters: FilterValues = { ...filters };
+    
+    if (parsed.brand) {
+      updatedFilters.brand = parsed.brand;
+    }
+    if (parsed.bagType) {
+      updatedFilters.bagType = parsed.bagType;
+    }
+    if (parsed.maxPrice) {
+      if (parsed.maxPrice <= 1000) {
+        updatedFilters.priceRange = "0-1000";
+      } else if (parsed.maxPrice <= 2500) {
+        updatedFilters.priceRange = "1000-2500";
+      } else if (parsed.maxPrice <= 5000) {
+        updatedFilters.priceRange = "2500-5000";
+      } else if (parsed.maxPrice <= 10000) {
+        updatedFilters.priceRange = "5000-10000";
+      } else {
+        updatedFilters.priceRange = "10000-";
+      }
+    }
+    
+    setFilters(updatedFilters);
+    
+    let enhancedQuery = parsed.searchText;
+    if (parsed.color) {
+      enhancedQuery = `${parsed.color} ${enhancedQuery}`;
+    }
+    
+    performSearch(enhancedQuery, updatedFilters);
   };
 
   const handleApplyFilters = () => {
@@ -162,7 +200,7 @@ export default function LandingPage() {
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search brands, models (e.g. Birkin), keywords…"
+                  placeholder="Ask me anything… e.g. 'I want a bag for a cocktail dinner under $5000'"
                   className="w-full h-14 pl-12 pr-4 bg-stone-50 border border-stone-100 rounded-xl text-stone-900 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500/50 transition-all"
                 />
               </div>

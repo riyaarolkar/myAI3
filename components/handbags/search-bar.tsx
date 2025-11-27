@@ -14,7 +14,7 @@ interface SearchBarProps {
 export function SearchBar({ 
   onSearch, 
   isLoading = false, 
-  placeholder = "Search brands, models (e.g. Birkin), keywords…",
+  placeholder = "Ask me anything… e.g. 'I want a bag for a cocktail dinner under $5000'",
   className 
 }: SearchBarProps) {
   const [query, setQuery] = useState("");

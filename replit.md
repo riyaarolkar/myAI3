@@ -12,27 +12,37 @@ A professional luxury handbag price-aggregator platform inspired by Chrono24 and
 - **Deployment**: Configured for Replit autoscale deployment
 
 ## Recent Changes
+- **Nov 27, 2025**: GPT-style conversational chat interface
+  - Replaced search bar with persistent chat UI
+  - Personal Concierge AI that stays in conversation (never disappears)
+  - Chat message history with user/assistant bubbles
+  - Products displayed inline within conversation
+  - Quick suggestion buttons for common queries
+  - "New Chat" button to start fresh conversations
+  - Natural language filter extraction (brand, price, color, occasion, bag type)
+  - /api/concierge endpoint for AI-powered responses
+  
 - **Nov 26, 2025**: Complete rebuild per specification
-  - New landing page with "Find Your Perfect Bag" hero
   - Chrono24-style Explore page with curated category grid
   - Multi-select filters: Brands, Countries, Bag Types, Price Range, Currency
   - 4-column responsive product grid (4 desktop, 2 tablet, 1 mobile)
   - Compare functionality with checkboxes on product cards
-  - New API structure: /api/search (GET), /api/explore (GET), /api/similar (GET)
   - Pinecone integration for vector similarity search
   - OpenAI embeddings for product indexing
-  - Currency conversion with live exchange rates
   - Real product images from Exa web search
 
 ## Key Features
-1. **Landing Page**: Hero search with collapsible filters panel
+1. **GPT-Style Chat Interface**: 
+   - Persistent conversation with Personal Concierge
+   - Natural language queries like "Find a bag for a cocktail dinner under $5000"
+   - Products shown inline with AI responses
+   - Chat history maintained throughout session
+   - Quick suggestion buttons for new users
 2. **Explore Page**: Chrono24-style category grid (Iconic Birkins, Chanel Classics, etc.)
-3. **Advanced Search**:
-   - Multi-select brand filters (17 luxury brands)
-   - Country filters (11 countries)
-   - Bag type filters (12 types)
-   - Price range selection
-   - Currency conversion (USD, EUR, GBP, JPY, CHF, INR)
+3. **Natural Language Understanding**:
+   - Extracts brand, color, price range, bag type, and occasion
+   - AI provides personalized recommendations and tips
+   - Conversational responses like a luxury boutique personal shopper
 4. **Product Cards**: 
    - Brand pill (top-left, uppercase)
    - Compare checkbox
@@ -65,6 +75,10 @@ A professional luxury handbag price-aggregator platform inspired by Chrono24 and
 ## Project Architecture
 
 ### API Endpoints
+- **POST /api/concierge**: AI concierge for natural language queries
+  - Body: { message: string }
+  - Returns: { message, tip, filters, searchQuery }
+  
 - **GET /api/search**: Search handbags with filters
   - Query params: q, brands, bag_type, country, min_price, max_price, currency, page, per_page
   - Returns: Paginated list of products
@@ -80,6 +94,7 @@ A professional luxury handbag price-aggregator platform inspired by Chrono24 and
 ```
 app/
 ├── api/
+│   ├── concierge/route.ts   # AI concierge endpoint
 │   ├── search/route.ts      # Main search endpoint
 │   ├── explore/route.ts     # Category collections
 │   └── similar/route.ts     # Similarity search
